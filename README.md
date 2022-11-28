@@ -13,7 +13,14 @@ This is the project's UML:
     src="/images/UML.jpg"
     title="Project UML"
     width="75%" height="75%">
+    
 The state machine node subscribes to the robot state node through the use of an interface class called AgentState. Through an instance of this class the state machine node is also set up as a client to the two action servers /choose_move_action_server and /execute_move_action_server. All nodes except the robot_state node are set up as clients to the armor service, although the state machine node gets set up through the use of a class called HandleOntology.
+
+<img
+    src="/images/statemachine.jpg"
+    title="Project State Machine"
+    width="75%" height="75%">
+
 
 
 
