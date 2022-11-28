@@ -1,13 +1,15 @@
 # Finite State Machine for a Surveilance Robot
 [Code Documentation](https://salvo-dippolito.github.io/ontological_surveyor/)
 ## Introduction
-This code was developed as a solution to the first assignment of the Experimental Robotics Lab course. It was requested to create a finite state machine architecture for a robot tasked with surveling the floor of a building. To reason about its postion in the floor's environment and to evaluate which rooms to surveil, the robot is introduced as an agent in an ontology with which it interacts by using the [armor package](https://github.com/EmaroLab/armor). The finite state machine architecture was instead stuructured by using [the SMACH package](http://wiki.ros.org/smach).
+This code was developed as a solution to the first assignment of the Experimental Robotics Lab course. It was requested to create in a ROS environment a finite state machine architecture for a robot tasked with surveling the floor of a building. To reason about its postion in the floor's environment and to evaluate which rooms to surveil, the robot is introduced as an agent in an ontology with which it interacts by using the [armor package](https://github.com/EmaroLab/armor). The finite state machine architecture was instead stuructured by using [the SMACH package](http://wiki.ros.org/smach).
 
-The robot should move around its environment giving priority to the rooms it hasn't visited for more than a certain threshold of time set by the user. It also has a simulated battery charging and discharging cycle that triggers it to stop executing its tasks so that it can move to a specific room E where it can plug in and recharge.
+The robot should move around its environment giving priority to the rooms it hasn't visited for more than a certain threshold of time set by the user, the rooms that satisfy this condition are considered 'urgent'. The robot agent also has a simulated battery charging and discharging cycle that triggers it to stop executing its tasks so that it can move to a specific room E where it can plug in and recharge.
 
 ## Software Architecture
-This project depends on one main node, two action servers, the armor service and a robot state notifications node. The details of how these components work together are shown in this project's documentation.
+This project depends on one main node, two action servers, the armor service and a robot state notifications node. The details of how these components work together are shown in this project's [documentation](https://salvo-dippolito.github.io/ontological_surveyor/).
+
 ### UML structure
+
 This is the project's UML:
 
 <img
@@ -40,24 +42,48 @@ Here is instead shown an example of user interaction in the initial state Load M
 
 ### Installation 
 
-These are thesteps to follow to get this simulation to run on your machine:
-1. Clone this repository inside your workspace (make sure it is sourced in your .bashrc).
-2. Install the [ARMOR](https://github.com/EmaroLab/armor/issues/7) and [Smach-ROS](http://wiki.ros.org/smach/Tutorials/Getting%20Started) package.
-  To interact with ARMOR a slightly modified version of the [armor_api](https://github.com/EmaroLab/armor_py_api) has been used. To simplify the installation process,   all the relevant scripts, along with the functions created ad hoc for this applications are present in this repository in the [armor_api](https://github.com/Salvo-Dippolito/ontological_surveyor/tree/main/scripts/armor_api) sub-folder.
-
+These are the steps to follow to get this simulation to run on your machine:
+1. Clone this repository inside your workspace (make sure it has been sourced in your .bashrc).
+2. Install the [ARMOR](https://github.com/EmaroLab/armor/issues/7) and [Smach-ROS](http://wiki.ros.org/smach/Tutorials/Getting%20Started) packages.
+  User note: To interact with ARMOR a slightly modified version of the [armor_api](https://github.com/EmaroLab/armor_py_api) has been used. To simplify the installation process, all the relevant scripts, along with the functions created ad hoc for this application are present in this repository in the [armor_api](https://github.com/Salvo-Dippolito/ontological_surveyor/tree/main/scripts/armor_api) sub-folder.
 3. Run `chmod +x <file_name>` for each pyhton file inside the scripts and armor_api folders.
 4. Run `catkin_make` from the root of your workspace.
 5. In order to correctly view this project's user interface you'll also need to install the `simple_colors` package by copying the following line on your terminal:
 
 ```
-pip install simple-colors
+pip3 install simple-colors
 ```
+
 ### Running the Code
+
 After completing the installation procedures you can run the simulation by launching:
+
 ```
 roslaunch ontological_surveyor surveyor.launch
 ```
 
+## Working Assumptions
 
+This initial version of the robot surveilance project is meant to barely put together the initial building blocks of what will be the final project for this year's course. By this reasoning, most of the software solutions applied here are just integrated as a proof of concept. The Choose Move state for example follows a particularly simple policy where it only has to reason over the rooms immediately reachable by the robot and doesn't have to plan ahead any movements through the ontology's connected locations. This implies that when the robot has to reach room 'E' from whichever room in the floor ontology, it doesn't have to build a logical plan to reach it but can just place the robot directly in 'E' without passing through any other room.
+Also the Execute Move state uses a very simplified version of what the final version of the code will have to do. In fact, the distance it simulates to traverse is a random number between 0.5 and 4 meters, and the direction in which this distance is covered is completely ignored.
+Moreover, as mentioned in the [documentation](https://salvo-dippolito.github.io/ontological_surveyor/), the layout of the floors that can be described by the ontology is stuctured so that all corridors connect to room 'E' and all subsequent corrdidors are always connected to each other. To better explain, if there are 5 corridors, corridor 3 will be connected to (aside from its rooms) room 'E', corridor 2 and corridor 4.
+For more details on the use of individuals and rules used in the ontology, please refer to the [topological_map](https://github.com/buoncubi/topological_map) repository on which this project was based.
 
-[topological_map](https://github.com/buoncubi/topological_map) 
+## System's Features
+
+As mentioned, the system allows the user to specify how many corridors are on the floor that the robot has to surveil and how many rooms are connected to each of these corridors. The user can also define after how many seconds since the last visit should a room be visited again by the robot. Being able to control this 'urgencyThreshold' allows the robot to visit a larger number of rooms instead of repeatedly visiting the same few rooms that keep turning 'urgent' as soon as the robot has moved away from them.  
+It is also possible, by changing in [this script](https://github.com/Salvo-Dippolito/ontological_surveyor/blob/main/scripts/robot_state.py) a boolean value from False to True, to switch the batttery state notifier in the robot_state node from a predictable charging and discharging cycle to a random one. This last feature has been added just as a testing tool to test the system's behaviour when confronted with random stimuli.
+
+## System's Limitations
+
+As mentioned in the Working Assumptions section, this current version of the system can't plan paths through a series of connected rooms but can only decide which of the reachable rooms should be visited on the basis of a very simple behaviour policy. Moreover, only the most basic functions of the robot have been modelled so the only real disturbance to the robot's normal behavioural routine is the battery's change of state from high to low, this limits the state machine's behaviour to a fairly predictable routine. 
+
+## Future Improvements
+
+Many aspects of this system can still be improved but were purposely left 'unresolved' so as to not over complicate the system, considering that it will soon undergo some major changes before reaching its final form. One of these things is the relation between the Charging state and the robot_state's battery status updater. In this version of the code, instead of waiting for a notification to be sent by the execute move action server to notify the battery state function when the robot has reached the charging station, the robot_state node just waits for a pre-set amount of time before initiating the robot's charging sequence. This works fine for now since the maximum distance that can be travelled by the robot during the execute move state is known, and in the worst case scenario there will just be a few seconds delay between when the robot reaches the station and when it actually starts charging.
+The battery discharging cycle could also be linked to the distance travelled by the robot and not be an arbitrarily decreasing value as it is set for now. In general, many elements of this version of the code are just placeholders for some future modifications that eil instead consist of some actually functional code.
+
+## Author's contacts
+
+Personal e-mail: salvo.dipp@gmail.com
+Institutional e-mail: s5324750@studenti.unige.it
