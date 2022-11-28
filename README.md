@@ -8,6 +8,11 @@ The robot should move around its environment giving priority to the rooms it has
 ## Software Architecture
 This project depends on one main node, two action servers, the armor service and a robot state notifications node. 
 
+<img
+    src="/images/UML.jpg"
+    title="Project UML"
+    width="75%" height="75%">
+
 
 
 ## Installation and Running Procedure
