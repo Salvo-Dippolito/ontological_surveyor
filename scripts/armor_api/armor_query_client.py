@@ -139,16 +139,13 @@ class ArmorQueryClient(object):
 
         
         res = self._client.call('QUERY','CLASS','IND',[ind_name,'false'])
-        # print('%s %s' %(ind_name,class_name))
-        # print(res.queried_objects) 
-        # print('\n')
+
         for element in res.queried_objects:
             element = element[32:-1]
-            #print (element)
+
             if element==class_name:
                 return True
-        #print('eh nono not is this the class it is but its not')
+
         return False
 
-        #res = self._client.call('QUERY','CLASS','IND',ind_name)
-        #print (res.queried_objects)
+
