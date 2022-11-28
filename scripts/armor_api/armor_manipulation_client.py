@@ -546,9 +546,7 @@ class ArmorManipulationClient(object):
         try:
             res=self._client.call('DISJOINT','IND','',individuals_list)
         except rospy.ServiceException as e:
-            raise ArmorServiceCallError(
-    
-                    "Service call failed disjoining individuals")
+            raise ArmorServiceCallError("Service call failed disjoining individuals")
         if res.success:
             return res.is_consistent
         else:
