@@ -26,7 +26,8 @@ The state machine node subscribes to the robot state node through the use of an 
     title="Project State Machine"
     width="75%" height="75%">
 
-There is an initial state called Load Map which only gets accessed at the start of the simulation. In that state the floor ontology is created by following user specifications and the agent is placed in its charging room 'E'. The robot then enters its main routine which has been subdivided in three main actions and consequently three different states: choosing where to go (Choose Move), getting there (Execute Move), and finally surveiling the place for a while (Surveil Room). If at any moment during the execution of each of these states the robot state node where to notify that the battery level was too low then the state machine would transition immediately into its charging state (Charging).
+There is an initial state called Load Map which only gets accessed at the start of the simulation. In that state the floor ontology is created by following user specifications and the agent is placed in its charging room 'E'. The robot then enters its main routine which has been subdivided in three main actions and consequently three different states: choosing where to go (Choose Move), getting there (Execute Move), and finally surveiling the place for a while (Surveil Room). If at any moment during the execution of each of these states the robot state node where to notify that the battery level was too low then the state machine would transition immediately into its charging state (Charging). 
+
 As shown in the documentation, the charging state is actually comprised of a two-phased task: moving back to the charging station and then waiting for the battery to charge. In this state the /execute_move_action_server is called with the chosen location preset as room 'E'.
 
 In this next gif it's possible to see what is shown to the user when the Surveil Room state is interrupted by the Charging state: 
@@ -36,7 +37,7 @@ In this next gif it's possible to see what is shown to the user when the Surveil
 Here is instead shown an example of user interaction in the initial state Load Map:
 ![](https://github.com/Salvo-Dippolito/ontological_surveyor/blob/main/images/load_map.gif)
 
-
+Side note: in the code and its documentation the verb 'surveil' has often been wrongfully substituted with the verb 'survey'.
 
 ## Installation and Running Procedure
 
@@ -65,6 +66,7 @@ roslaunch ontological_surveyor surveyor.launch
 ## Working Assumptions
 
 This initial version of the robot surveilance project is meant to barely put together the initial building blocks of what will be the final project for this year's course. By this reasoning, most of the software solutions applied here are just integrated as a proof of concept. The Choose Move state for example follows a particularly simple policy where it only has to reason over the rooms immediately reachable by the robot and doesn't have to plan ahead any movements through the ontology's connected locations. This implies that when the robot has to reach room 'E' from whichever room in the floor ontology, it doesn't have to build a logical plan to reach it but can just place the robot directly in 'E' without passing through any other room.
+
 Also the Execute Move state uses a very simplified version of what the final version of the code will have to do. In fact, the distance it simulates to traverse is a random number between 0.5 and 4 meters, and the direction in which this distance is covered is completely ignored.
 Moreover, as mentioned in the [documentation](https://salvo-dippolito.github.io/ontological_surveyor/), the layout of the floors that can be described by the ontology is stuctured so that all corridors connect to room 'E' and all subsequent corrdidors are always connected to each other. To better explain, if there are 5 corridors, corridor 3 will be connected to (aside from its rooms) room 'E', corridor 2 and corridor 4.
 For more details on the use of individuals and rules used in the ontology, please refer to the [topological_map](https://github.com/buoncubi/topological_map) repository on which this project was based.
