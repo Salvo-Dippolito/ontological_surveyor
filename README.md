@@ -27,6 +27,7 @@ The state machine node subscribes to the robot state node through the use of an 
 There is an initial state called Load Map which only gets accessed at the start of the simulation. In that state the floor ontology is created by following user specifications and the agent is placed in its charging room 'E'. The robot then enters its main routine which has been subdivided in three main actions and consequently three different states: choosing where to go (Choose Move), getting there (Execute Move), and finally surveiling the place for a while (Surveil Room). If at any moment during the execution of each of these states the robot state node where to notify that the battery level was too low then the state machine would transition immediately into its charging state (Charging).
 As shown in the documentation, the charging state is actually comprised of a two-phased task: moving back to the charging station and then waiting for the battery to charge. In this state the /execute_move_action_server is called with the chosen location preset as room 'E'.
 
+[video!](https://github.com/Salvo-Dippolito/ontological_surveyor/blob/main/images/interrupt_surveil.gif)
 
 
 
