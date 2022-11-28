@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scripts.agent_interface &mdash; surveilance_robot_fsm 1.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> surveilance_robot_fsm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts.html">Agent Interface Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts.html#module-scripts.ontology_interface">Ontology Interface Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts.html#module-scripts.robot_state">Robot State Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts.html#module-scripts.choose_move">Choose Move Action Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts.html#module-scripts.execute_move">Execute Move Action Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts.html#module-scripts.home_surveilance_state_machine">Finite State Machine Module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">surveilance_robot_fsm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">scripts.agent_interface</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scripts.agent_interface</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">.. module:: agent_interface</span>
+<span class="sd">  :platform: Unix</span>
+<span class="sd">  :synopsis: Python module that contains the classes ActionclientHelper and AgentState</span>
+
+<span class="sd">.. moduleauthor:: Salvatore D&#39;Ippolito</span>
+
+<span class="sd">This module contains the classes called to interface the finite state machine node with the action clients and topics related </span>
+<span class="sd">to the robot agent moving in the armor ontology. </span>
+
+<span class="sd">The class ActionClientHelper has been taken as is from this repository: https://github.com/buoncubi/arch_skeleton                                                                   </span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="c1"># Import ROS libraries.</span>
+<span class="kn">import</span> <span class="nn">rospy</span>
+
+<span class="kn">from</span> <span class="nn">actionlib</span> <span class="kn">import</span> <span class="n">SimpleActionClient</span>
+
+<span class="c1"># Import mutex to manage synchronization among ROS-based threads (i.e., node loop and subscribers)</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Lock</span>
+
+
+<span class="c1"># Import ROS-based messages.</span>
+<span class="kn">from</span> <span class="nn">std_msgs.msg</span> <span class="kn">import</span> <span class="n">Bool</span>
+
+<span class="kn">from</span> <span class="nn">ontological_surveyor.msg</span> <span class="kn">import</span> <span class="n">ExecuteMoveFeedback</span><span class="p">,</span> <span class="n">ExecuteMoveResult</span><span class="p">,</span> <span class="n">ExecuteMoveGoal</span><span class="p">,</span> <span class="n">ExecuteMoveAction</span>
+<span class="kn">from</span> <span class="nn">ontological_surveyor.msg</span> <span class="kn">import</span> <span class="n">ChooseMoveFeedback</span><span class="p">,</span> <span class="n">ChooseMoveResult</span><span class="p">,</span> <span class="n">ChooseMoveGoal</span><span class="p">,</span> <span class="n">ChooseMoveAction</span>
+
+
+<span class="c1"># A class to simplify the implementation of a client for ROS action servers. It is used by the `InterfaceHelper` class.</span>
+<div class="viewcode-block" id="ActionClientHelper"><a class="viewcode-back" href="../../scripts.html#scripts.agent_interface.ActionClientHelper">[docs]</a><span class="k">class</span> <span class="nc">ActionClientHelper</span><span class="p">:</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class constructor, i.e., class initializer. Input parameters are:</span>
+
+<span class="sd">    - `service_name`: it is the name of the server that will be invoked by this client.</span>
+
+<span class="sd">    - `action_type`: it is the message type that the server will exchange</span>
+
+<span class="sd">    - `done_callback`: it is the name of the function called when the action server completed its computation. If</span>
+<span class="sd">      this parameter is not set (i.e., set to `None`), then only the `self._done_callback` function will be</span>
+<span class="sd">      called when the server completes its computation.</span>
+
+<span class="sd">    - `feedback_callback`: it is the name of the function called when the action server sends a feedback message. If</span>
+<span class="sd">      this parameter is not set (i.e., set to `None`), then only the `self._feedback_callback` functions will be</span>
+<span class="sd">      called when the server sends a feedback message.</span>
+
+<span class="sd">    - `mutex`: it is a `Lock` object synchronised with the `done_callback` and `feedback_callback`. If it is not set</span>
+<span class="sd">      (i.e., set to `None`), then a new mutex instance is considered. Set this variable if you want to extends the</span>
+<span class="sd">      synchronization with other classes.</span>
+<span class="sd">    </span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">service_name</span><span class="p">,</span> <span class="n">action_type</span><span class="p">,</span> <span class="n">done_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">feedback_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mutex</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Initialise the state of this client, i.e.,  `_is_running`, `_is_done`, and `_results`.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_client_states</span><span class="p">()</span>
+        <span class="c1"># Set the name of the server to be invoked.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_service_name</span> <span class="o">=</span> <span class="n">service_name</span>
+        <span class="c1"># Get or create a new mutex.</span>
+        <span class="k">if</span> <span class="n">mutex</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mutex</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mutex</span> <span class="o">=</span> <span class="n">mutex</span>
+        <span class="c1"># Instantiate a simple ROS-based action client.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">SimpleActionClient</span><span class="p">(</span><span class="n">service_name</span><span class="p">,</span> <span class="n">action_type</span><span class="p">)</span>
+        <span class="c1"># Set the done and feedback callbacks defined by the class using this client.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_external_done_cb</span> <span class="o">=</span> <span class="n">done_callback</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_external_feedback_cb</span> <span class="o">=</span> <span class="n">feedback_callback</span>
+        <span class="c1"># Wait for the action server to be alive.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">wait_for_server</span><span class="p">()</span>
+
+    <span class="c1"># Start the action server with a new `goal`. Note this call is not blocking (i.e., asynchronous performed).</span>
+    <span class="k">def</span> <span class="nf">send_goal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goal</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_running</span><span class="p">:</span>
+            <span class="c1"># Start the action server.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">send_goal</span><span class="p">(</span><span class="n">goal</span><span class="p">,</span>
+                                   <span class="n">done_cb</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_done_callback</span><span class="p">,</span>
+                                   <span class="n">feedback_cb</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_feedback_callback</span><span class="p">)</span>
+            <span class="c1"># Set the client&#39;s states.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_is_running</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_is_done</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warn_msg</span> <span class="o">=</span> <span class="s1">&#39;Warning send a new goal, cancel the current request first!&#39;</span>
+         
+
+    <span class="c1"># Stop the computation of the action server.</span>
+    <span class="k">def</span> <span class="nf">cancel_goals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># The computation can be stopped only if the server is actually computing.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_running</span><span class="p">:</span>
+            <span class="c1"># Stop the computation.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">cancel_all_goals</span><span class="p">()</span>
+            <span class="c1"># Reset the client&#39;s state.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset_client_states</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warn_msg</span> <span class="o">=</span> <span class="s1">&#39;Warning cannot cancel a not running service!&#39;</span>
+        
+
+    <span class="c1"># Reset the client state variables stored in this class.</span>
+    <span class="k">def</span> <span class="nf">reset_client_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_running</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_done</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># This function is called when the action server sends some `feedback` back to the client.</span>
+    <span class="k">def</span> <span class="nf">_feedback_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feedback</span><span class="p">):</span>
+
+        <span class="c1"># Acquire the mutex to synchronise the computation concerning the `feedback` message with the other nodes of the architecture.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Eventually, call the method provided by the node that uses this action client to manage a feedback.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_external_feedback_cb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_external_feedback_cb</span><span class="p">(</span><span class="n">feedback</span><span class="p">)</span>
+            <span class="c1"># Uncomment below to log information.</span>
+            <span class="c1"># rospy.loginfo(anm.tag_log(f&#39;`{self._service_name}` action server provide feedback: {feedback}.&#39;, LOG_TAG))</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="c1"># Realise the mutex to (eventually) unblock ROS-based thread waiting on the same mutex.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+    <span class="c1"># This function is called when the action server finish its computation, i.e., it provides a `done` message.</span>
+    <span class="k">def</span> <span class="nf">_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+        <span class="c1"># Acquire the mutex to synchronise the computation concerning the `done` message with the other nodes of the architecture.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Set the client&#39;s state</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_is_running</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_is_done</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span> <span class="o">=</span> <span class="n">results</span>
+            <span class="c1"># Eventually, call the method provided by the node that uses this action client to manage a result.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_external_done_cb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_external_done_cb</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+            <span class="c1"># Uncomment below to log information.</span>
+            <span class="c1"># log_msg = f&#39;`{self._service_name}` done with state `{self._client.get_state_txt()}` and result: {results}.&#39;</span>
+            <span class="c1"># rospy.loginfo(anm.tag_log(log_msg, LOG_TAG))</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+    <span class="c1"># Get `True` if the action server finished is computation, or `False` otherwise.</span>
+    <span class="c1"># Note that use this method should do it in a `self._mutex` safe manner.</span>
+    <span class="k">def</span> <span class="nf">is_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># they should be mutex safe</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_done</span>
+
+    <span class="c1"># Get `True` if the action server is running, or `False` otherwise.</span>
+    <span class="c1"># A note that use this method should do it in a `self._mutex` safe manner.</span>
+    <span class="k">def</span> <span class="nf">is_running</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_running</span>
+
+    <span class="c1"># Get the results of the action server, if any, or `None`.</span>
+    <span class="k">def</span> <span class="nf">get_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_done</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">log_err</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Error: cannot get result for `</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_service_name</span><span class="si">}</span><span class="s1">`.&#39;</span>
+
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="AgentState"><a class="viewcode-back" href="../../scripts.html#scripts.agent_interface.AgentState">[docs]</a><span class="k">class</span> <span class="nc">AgentState</span><span class="p">:</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class when instantiated, sets up two clients for the action servers ChooseMove and ExecuteMove.</span>
+<span class="sd">    It also sets up as a subscriber to the battery state publisher node. It makes it possible for the </span>
+<span class="sd">    state machine node to retrieve information from, and give comands to, the  robot.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mutex</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+    
+        <span class="bp">self</span><span class="o">.</span><span class="n">_battery_low</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remaining_meters</span><span class="o">=</span><span class="mi">42</span>
+
+        <span class="n">rospy</span><span class="o">.</span><span class="n">Subscriber</span><span class="p">(</span><span class="s1">&#39;state/battery_low&#39;</span><span class="p">,</span> <span class="n">Bool</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">battery_callback</span><span class="p">)</span>
+       
+        <span class="bp">self</span><span class="o">.</span><span class="n">choose_move_client</span> <span class="o">=</span> <span class="n">ActionClientHelper</span><span class="p">(</span><span class="s1">&#39;choose_move&#39;</span><span class="p">,</span><span class="n">ChooseMoveAction</span><span class="p">,</span> <span class="n">mutex</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mutex</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">execute_move_client</span> <span class="o">=</span> <span class="n">ActionClientHelper</span><span class="p">(</span><span class="s1">&#39;execute_move&#39;</span><span class="p">,</span><span class="n">ExecuteMoveAction</span><span class="p">,</span><span class="n">feedback_callback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">move_feedback_cb</span><span class="p">,</span> <span class="n">mutex</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mutex</span><span class="p">)</span>
+
+    
+<div class="viewcode-block" id="AgentState.move_feedback_cb"><a class="viewcode-back" href="../../scripts.html#scripts.agent_interface.AgentState.move_feedback_cb">[docs]</a>    <span class="k">def</span> <span class="nf">move_feedback_cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">feedback</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is a feedback callback function for the ExecuteMove action server, it saves in a class variable the distance left </span>
+<span class="sd">        to reach the target passed to the server.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">remaining_meters</span><span class="o">=</span> <span class="n">feedback</span><span class="o">.</span><span class="n">meters_to_destination</span></div>
+        
+
+
+    
+<div class="viewcode-block" id="AgentState.meters_to_destination"><a class="viewcode-back" href="../../scripts.html#scripts.agent_interface.AgentState.meters_to_destination">[docs]</a>    <span class="k">def</span> <span class="nf">meters_to_destination</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method is called to retrieve the feedback value from the ExecuteMove action server</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remaining_meters</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>    
+            
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">remaining_meters</span></div>
+
+
+  
+<div class="viewcode-block" id="AgentState.battery_callback"><a class="viewcode-back" href="../../scripts.html#scripts.agent_interface.AgentState.battery_callback">[docs]</a>    <span class="k">def</span> <span class="nf">battery_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is a subscriber callback function from the topic &#39;state/battery_low&#39;, when the battery state gets updated, this callback saves it in a class variable</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Acquire the mutex to assure the synchronization with other subscribers and action clients (this assures data consistency).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Get the battery state and set it as the relative state variable encoded in this class.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_battery_low</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="c1"># Release the mutex to eventually unblock the other subscribers or action servers that are waiting.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span></div>
+    
+
+<div class="viewcode-block" id="AgentState.is_battery_low"><a class="viewcode-back" href="../../scripts.html#scripts.agent_interface.AgentState.is_battery_low">[docs]</a>    <span class="k">def</span> <span class="nf">is_battery_low</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method gets called to check the robot&#39;s battery state, it returns the value previously set by the battery_callback function</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_battery_low</span></div></div>
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Salvatore D&#39;Ippolito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

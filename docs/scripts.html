@@ -68,11 +68,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="#module-scripts.choose_move">Choose Move Action Server</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#scripts.choose_move.ChoosingMove"><code class="docutils literal notranslate"><span class="pre">ChoosingMove</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#scripts.choose_move.ChoosingMove.classify_rooms"><code class="docutils literal notranslate"><span class="pre">ChoosingMove.classify_rooms()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scripts.choose_move.ChoosingMove.clean_room_strings"><code class="docutils literal notranslate"><span class="pre">ChoosingMove.clean_room_strings()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#scripts.choose_move.ChoosingMove"><code class="docutils literal notranslate"><span class="pre">ChoosingMove</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="#module-scripts.execute_move">Execute Move Action Server</a><ul>
@@ -135,7 +131,7 @@
 <span id="agent-interface-module"></span><h1>Agent Interface Module<a class="headerlink" href="#module-scripts.agent_interface" title="Permalink to this heading"></a></h1>
 <span class="target" id="module-agent_interface"></span><p>This module contains the classes called to interface the finite state machine node with the action clients and topics related
 to the robot agent moving in the armor ontology.</p>
-<p>The class ActionClientHelper has been tahen as is from this repository: <a class="reference external" href="https://github.com/buoncubi/arch_skeleton">https://github.com/buoncubi/arch_skeleton</a></p>
+<p>The class ActionClientHelper has been taken as is from this repository: <a class="reference external" href="https://github.com/buoncubi/arch_skeleton">https://github.com/buoncubi/arch_skeleton</a></p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scripts.agent_interface.ActionClientHelper">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.agent_interface.</span></span><span class="sig-name descname"><span class="pre">ActionClientHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">done_callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feedback_callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/agent_interface.html#ActionClientHelper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.agent_interface.ActionClientHelper" title="Permalink to this definition"></a></dt>
@@ -251,36 +247,11 @@ change the state of the battery at random time intervals</p>
 </div>
 <div class="section" id="module-scripts.choose_move">
 <span id="choose-move-action-server"></span><h1>Choose Move Action Server<a class="headerlink" href="#module-scripts.choose_move" title="Permalink to this heading"></a></h1>
-<span class="target" id="module-choose_move"></span><p>This module holds the code for the choose_move Simple Action Server. The sever is instatiated by the class ChoosingMove.</p>
+<span class="target" id="module-choose_move"></span><p>This module contains the node for the action server ChooseMove, whose code is kept in the class ChoosingMove.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scripts.choose_move.ChoosingMove">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.choose_move.</span></span><span class="sig-name descname"><span class="pre">ChoosingMove</span></span><a class="reference internal" href="_modules/scripts/choose_move.html#ChoosingMove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.choose_move.ChoosingMove" title="Permalink to this definition"></a></dt>
-<dd><p>This class instantiates the choose_move action server. This server receives a boolean variable as a request, this will be changed in
-future versions of this project where choosing where to go might need some prior knowledge to be passed from other nodes of the state machine.</p>
-<p>After querying the ontology server, it separates the reachable locations according to their classes and computes where to go. Priority is given to
-urgent rooms, and when there are no reachable urgent rooms, there’s a 60% chance that a reachable corrible will be chosen over any other non urgent rooms.
-The new chosen location is passed on as the action server’s response. In this version of the code this server has no use for a feedback functionality,
-so no feedback gets published.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="scripts.choose_move.ChoosingMove.classify_rooms">
-<span class="sig-name descname"><span class="pre">classify_rooms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">room_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/choose_move.html#ChoosingMove.classify_rooms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.choose_move.ChoosingMove.classify_rooms" title="Permalink to this definition"></a></dt>
-<dd><p>This method classifies the reachable locations according to their classes:</p>
-<ul class="simple">
-<li><p>corridor</p></li>
-<li><p>urgent</p></li>
-<li><p>non urgent</p></li>
-</ul>
-<p>It takes a list of strings as an argument and returns three different sub-lists of the input list.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="scripts.choose_move.ChoosingMove.clean_room_strings">
-<span class="sig-name descname"><span class="pre">clean_room_strings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">room_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/choose_move.html#ChoosingMove.clean_room_strings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.choose_move.ChoosingMove.clean_room_strings" title="Permalink to this definition"></a></dt>
-<dd><p>This method is used to extract only the necessary information from the armor server
-reponse string. It takes a string list as an argument and returns a ‘clean’ list of strings
-with the same number of elements as the input string.</p>
-</dd></dl>
-
+<dd><p>This class initiates the choose_move Simple Action Server.</p>
 </dd></dl>
 
 </div>
@@ -294,7 +265,7 @@ with the same number of elements as the input string.</p>
 <dd class="field-even"><p>Pyhton module for the ExecuteMove action server</p>
 </dd>
 </dl>
-<p>This module holds the code for the execute_move Simple Action Server. The sever is instatiated by the class Moving2Location.</p>
+<p>This module holds the code for the execute_move Simple Action Server. The sever is instantiated by the class Moving2Location.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scripts.execute_move.Moving2Location">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.execute_move.</span></span><span class="sig-name descname"><span class="pre">Moving2Location</span></span><a class="reference internal" href="_modules/scripts/execute_move.html#Moving2Location"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.execute_move.Moving2Location" title="Permalink to this definition"></a></dt>
