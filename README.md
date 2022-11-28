@@ -10,7 +10,7 @@ This project depends on one main node, two action servers, the armor service and
 
 ### UML structure
 
-This is the project's UML:
+This is the project's UML diagram:
 
 <img
     src="/images/UML.jpg"
@@ -85,5 +85,5 @@ The battery discharging cycle could also be linked to the distance travelled by 
 
 ## Author's contacts
 
-Personal e-mail: salvo.dipp@gmail.com
-Institutional e-mail: s5324750@studenti.unige.it
+- Personal e-mail: salvo.dipp@gmail.com
+- Institutional e-mail: s5324750@studenti.unige.it
