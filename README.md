@@ -1,2 +1,4 @@
 # Finite State Machine for a Surveilance Robot
-[Documentation](https://salvo-dippolito.github.io/ontological_surveyor/)
+[Code Documentation](https://salvo-dippolito.github.io/ontological_surveyor/)
+## Introduction
+This code was developed as a solution to the first assignment of the Experimental Robotics Lab course. It was requested to create a finite state machine architecture for a robot tasked with surveying the floor of a building. To reason about its postion in the floor's environment and to evaluate which rooms to surveil the robot is introduced as an agent in an ontology with which it interacts by using the [armor package](https://github.com/EmaroLab/armor).
