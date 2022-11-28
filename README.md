@@ -46,7 +46,7 @@ Side note: in the code and its documentation the verb 'surveil' has often been w
 These are the steps to follow to get this simulation to run on your machine:
 1. Clone this repository inside your workspace (make sure it has been sourced in your .bashrc).
 2. Install the [ARMOR](https://github.com/EmaroLab/armor/issues/7) and [Smach-ROS](http://wiki.ros.org/smach/Tutorials/Getting%20Started) packages.
-  User note: To interact with ARMOR a slightly modified version of the [armor_api](https://github.com/EmaroLab/armor_py_api) has been used with almost no modifications. To simplify the installation process, all the relevant scripts, along with the functions created ad hoc for this application (namely: disjoin_all_inds and check_if_ind_belongs_to_class) are present in this repository in the [armor_api](https://github.com/Salvo-Dippolito/ontological_surveyor/tree/main/scripts/armor_api) sub-folder.
+  User note: To interact with ARMOR a slightly modified version of the [armor_api](https://github.com/EmaroLab/armor_py_api) has been used with almost no modifications. To simplify the installation process, all the relevant scripts, along with the functions created ad hoc for this application (namely: disjoin_all_inds and check_if_ind_b2_class) are present in this repository in the [armor_api](https://github.com/Salvo-Dippolito/ontological_surveyor/tree/main/scripts/armor_api) sub-folder.
 3. Run `chmod +x <file_name>` for each pyhton file inside the scripts and armor_api folders.
 4. Run `catkin_make` from the root of your workspace.
 5. In order to correctly view this project's user interface you'll also need to install the `simple_colors` package by copying the following line on your terminal:
