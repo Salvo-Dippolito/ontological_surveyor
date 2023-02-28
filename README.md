@@ -74,7 +74,7 @@ For more details on the use of individuals and rules used in the ontology, pleas
 ## System's Features
 
 As mentioned, the system allows the user to specify how many corridors are on the floor that the robot has to surveil and how many rooms are connected to each of these corridors. The user can also define after how many seconds since the last visit should a room be visited again by the robot. Being able to control this 'urgencyThreshold' allows the robot to visit a larger number of rooms instead of repeatedly visiting the same few rooms that keep turning 'urgent' as soon as the robot has moved away from them.  
-It is also possible, by changing in [this script](https://github.com/Salvo-Dippolito/ontological_surveyor/blob/main/scripts/robot_state.py) a boolean value from False to True, to switch the batttery state notifier in the robot_state node from a predictable charging and discharging cycle to a random one. This last feature has been added just as a testing tool to test the system's behaviour when confronted with random stimuli.
+It is also possible, by changing in [this script](https://github.com/Salvo-Dippolito/ontological_surveyor/blob/main/scripts/robot_state.py) a boolean value from False to True, to switch the battery state notifier in the robot_state node from a predictable charging and discharging cycle to a random one. This last feature has been added just as a testing tool to test the system's behaviour when confronted with random stimuli.
 
 ## System's Limitations
 
@@ -83,7 +83,7 @@ As mentioned in the Working Assumptions section, this current version of the sys
 ## Future Improvements
 
 Many aspects of this system can still be improved but were purposely left 'unresolved' so as to not over complicate the system, considering that it will soon undergo some major changes before reaching its final form. One of these things is the relation between the Charging state and the robot_state's battery status updater. In this version of the code, instead of waiting for a notification to be sent by the execute move action server to notify the battery state function when the robot has reached the charging station, the robot_state node just waits for a pre-set amount of time before initiating the robot's charging sequence. This works fine for now since the maximum distance that can be travelled by the robot during the execute move state is known, and in the worst case scenario there will just be a few seconds delay between when the robot reaches the station and when it actually starts charging.
-The battery discharging cycle could also be linked to the distance travelled by the robot and not be an arbitrarily decreasing value as it is set for now. In general, many elements of this version of the code are just placeholders for some future modifications that eil instead consist of some actually functional code.
+The battery discharging cycle could also be linked to the distance travelled by the robot and not be an arbitrarily decreasing value as it is set for now. In general, many elements of this version of the code are just placeholders for some future modifications that will instead consist of some actually functional code.
 
 ## Author's contacts
 
